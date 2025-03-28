@@ -330,11 +330,54 @@
             .scroll-skeleton-container {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .gallery {
+                column-count: 2;
+            }
         }
 
         @media (max-width: 600px) {
             .scroll-skeleton-container {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                padding: 5px;
+            }
+            
+            .gallery {
+                column-count: 2;
+                column-gap: 15px;
+            }
+            
+            .gallery-item {
+                margin-bottom: 15px;
+            }
+            
+            /* Smaller skeleton items for mobile */
+            .scroll-skeleton-item:nth-child(1),
+            .scroll-skeleton-item:nth-child(2) {
+                height: 160px;
+            }
+            
+            .scroll-skeleton-item:nth-child(3) {
+                display: none; /* Hide the third skeleton item on mobile */
+            }
+            
+            /* Adjust the faux text lines */
+            .scroll-skeleton-item span:nth-child(2) {
+                bottom: 20px;
+                height: 6px;
+                width: 45%;
+            }
+            
+            .scroll-skeleton-item span:nth-child(3) {
+                bottom: 8px;
+                height: 5px;
+                width: 65%;
+            }
+            
+            /* Make loading indicator smaller */
+            .loading-more {
+                margin: 1.5rem auto 2rem;
             }
         }
         
