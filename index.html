@@ -1,75 +1,589 @@
-import os
-import shutil
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memories Of Us</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=La+Belle+Aurore&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: #f8f3f0;
+            font-family: 'Crimson Text', serif;
+            color: #4a0f1d;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(#e5d1cb 1px, transparent 1px),
+                radial-gradient(#e5d1cb 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
 
-def rename_image_files(folder_path):
-    """
-    Rename image files in the specified folder sequentially.
-    
-    Args:
-    folder_path (str): Path to the folder containing image files
-    
-    Supported file extensions: .png, .jpeg, .jpg, .heic
-    """
-    # Supported image extensions
-    supported_extensions = ['.png', '.jpeg', '.jpg', '.heic']
-    
-    # Get all image files in the folder
-    image_files = [f for f in os.listdir(folder_path) if os.path.splitext(f)[1].lower() in supported_extensions]
-    
-    # Sort files to ensure consistent ordering
-    image_files.sort()
-    
-    # Track how many files were successfully renamed
-    renamed_count = 0
-    
-    # Rename files
-    for index, filename in enumerate(image_files, 1):
-        # Get the file extension
-        file_ext = os.path.splitext(filename)[1]
+        /* Define animations */
+        @keyframes heartbeat {
+            0% { transform: scale(1) rotate(45deg); }
+            15% { transform: scale(1.1) rotate(45deg); }
+            30% { transform: scale(1) rotate(45deg); }
+            45% { transform: scale(1.1) rotate(45deg); }
+            60% { transform: scale(1) rotate(45deg); }
+            100% { transform: scale(1) rotate(45deg); }
+        }
         
-        # Create new filename
-        new_filename = f"{index}{file_ext}"
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         
-        # Full paths
-        old_path = os.path.join(folder_path, filename)
-        new_path = os.path.join(folder_path, new_filename)
+        @keyframes floatIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
         
-        # Skip if the filenames are the same
-        if filename == new_filename:
-            print(f"Skipping: {filename} (already has the correct name)")
-            continue
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 20px rgba(74, 15, 29, 0.1); }
+            50% { box-shadow: 0 8px 25px rgba(74, 15, 29, 0.2); }
+            100% { box-shadow: 0 4px 20px rgba(74, 15, 29, 0.1); }
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f3f0;
+            z-index: 1000;
+            transition: opacity 0.8s ease-out;
+            background-image: 
+                radial-gradient(#e5d1cb 1px, transparent 1px),
+                radial-gradient(#e5d1cb 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        .card {
+            position: relative;
+            width: 90vw;
+            max-width: 400px;
+            height: 90vw;
+            max-height: 400px;
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .blur-shape {
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            background-color: #4a0f1d;
+            transform: rotate(45deg);
+            filter: blur(10px);
+            opacity: 0.95;
+            top: 15%;
+            animation: heartbeat 2s infinite ease-in-out;
+        }
         
-        try:
-            # Check if the target file already exists
-            if os.path.exists(new_path):
-                print(f"Skipping: {filename} -> {new_filename} (target file already exists)")
-                continue
+        .blur-shape::before,
+        .blur-shape::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #4a0f1d;
+            border-radius: 50%;
+            filter: blur(10px);
+        }
+        
+        .blur-shape::before {
+            top: -50%;
+            left: 0;
+        }
+        
+        .blur-shape::after {
+            top: 0;
+            left: -50%;
+        }
+
+        /* Create a cleaner heart shape with less blur */
+        .blur-shape, .blur-shape::before, .blur-shape::after {
+            box-shadow: 0 0 10px 3px rgba(74, 15, 29, 0.5);
+        }
+        
+        .text {
+            position: absolute;
+            bottom: 8%;
+            color: #4a0f1d;
+            font-size: clamp(1rem, 5vw, 1.5rem);
+            text-align: center;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+            z-index: 20;
+            width: 90%;
+            line-height: 1.4;
+            font-family: 'La Belle Aurore', cursive;
+        }
+
+        /* Main Content */
+        .main-content {
+            opacity: 0;
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+            transition: opacity 0.8s ease-in;
+        }
+
+        .title {
+            text-align: center;
+            margin: 2rem 0 3rem;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            color: #4a0f1d;
+            letter-spacing: 1px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        /* Pinterest-like gallery */
+        .gallery {
+            column-count: 3;
+            column-gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(74, 15, 29, 0.1);
+            transition: all 0.5s ease;
+            background-color: #f8f3f0;
+            animation: floatIn 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 8px 25px rgba(74, 15, 29, 0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-item::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 70%, rgba(74, 15, 29, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .gallery-item:hover::after {
+            opacity: 1;
+        }
+        
+        /* Loading indicator for infinite scroll - Shadcn UI inspired */
+        .loading-more {
+            width: 100%;
+            max-width: 1200px;
+            margin: 2rem auto 3rem;
+            display: none;
+        }
+
+        .scroll-skeleton-container {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            position: relative;
+            padding: 10px;
+        }
+
+        /* Shadcn-inspired skeletal item */
+        .scroll-skeleton-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            background-color: hsl(6, 10%, 97%);
+            box-shadow: 
+                0 1px 2px rgba(0, 0, 0, 0.04),
+                0 2px 4px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s ease;
+        }
+        
+        /* Varied heights for more natural appearance */
+        .scroll-skeleton-item:nth-child(1) {
+            height: 230px;
+        }
+        
+        .scroll-skeleton-item:nth-child(2) {
+            height: 190px;
+        }
+        
+        .scroll-skeleton-item:nth-child(3) {
+            height: 250px;
+        }
+        
+        /* Shadcn-inspired shimmer effect */
+        .scroll-skeleton-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                hsl(6, 10%, 97%) 0%,
+                hsl(6, 10%, 95%) 20%,
+                hsl(6, 10%, 97%) 40%
+            );
+            background-size: 200% 100%;
+            animation: shimmer 2s ease-in-out infinite;
+            z-index: 1;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -100% 0; }
+            100% { background-position: 100% 0; }
+        }
+        
+        /* Image placeholder */
+        .scroll-skeleton-item::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(
+                to bottom,
+                transparent,
+                rgba(74, 15, 29, 0.04) 70%,
+                rgba(74, 15, 29, 0.06) 100%
+            );
+            border-radius: 0 0 12px 12px;
+            z-index: 2;
+        }
+        
+        /* Faux image aspect ratio container */
+        .scroll-skeleton-item span:first-child {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: calc(100% - 40px);
+            border-radius: 12px 12px 0 0;
+        }
+        
+        /* Faux text line - title */
+        .scroll-skeleton-item span:nth-child(2) {
+            position: absolute;
+            bottom: 24px;
+            left: 15px;
+            width: 50%;
+            height: 8px;
+            background-color: rgba(74, 15, 29, 0.06);
+            border-radius: 4px;
+        }
+        
+        /* Faux text line - subtitle */
+        .scroll-skeleton-item span:nth-child(3) {
+            position: absolute;
+            bottom: 10px;
+            left: 15px;
+            width: 70%;
+            height: 6px;
+            background-color: rgba(74, 15, 29, 0.04);
+            border-radius: 3px;
+        }
+        
+        /* Media queries for responsive design */
+        @media (max-width: 900px) {
+            .scroll-skeleton-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .scroll-skeleton-container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        /* Custom scroll-skeleton entry animation */
+        @keyframes fadeInUpSoft {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .scroll-skeleton-container {
+            animation: fadeInUpSoft 0.4s ease-out forwards;
+        }
+
+        /* No images message styling */
+        #no-images-message {
+            text-align: center;
+            margin: 40px 0;
+            padding: 30px;
+            color: #4a0f1d;
+            border: 1px dashed rgba(74, 15, 29, 0.3);
+            border-radius: 10px;
+            background-color: rgba(74, 15, 29, 0.05);
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        /* Media queries for different screen sizes */
+        @media (max-width: 400px) {
+            .card {
+                height: 85vh;
+            }
+            
+            .blur-shape {
+                top: 20%;
+            }
+            
+            .text {
+                bottom: 12%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <div class="card">
+            <div class="blur-shape"></div>
+            <div class="text">
+                all the pretty stars shine for you, my love
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 class="title">Memories Of Us That Live In My Mind</h1>
+        <div class="gallery" id="gallery">
+            <!-- Images will be loaded here dynamically -->
+        </div>
+        
+        <!-- Loading indicator for infinite scroll -->
+        <div class="loading-more" id="loading-more">
+            <div class="scroll-skeleton-container">
+                <div class="scroll-skeleton-item">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="scroll-skeleton-item">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="scroll-skeleton-item">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show loading screen for at least 3 seconds
+            setTimeout(function() {
+                const loadingScreen = document.querySelector('.loading-screen');
+                const mainContent = document.querySelector('.main-content');
                 
-            # Rename the file using os.rename instead of shutil.copy2
-            os.rename(old_path, new_path)
-            print(f"Renamed: {filename} -> {new_filename}")
-            renamed_count += 1
-        except Exception as e:
-            print(f"Error renaming {filename}: {e}")
-    
-    print(f"Renamed {renamed_count} out of {len(image_files)} image files.")
-
-def main():
-    # Get folder path from user input
-    folder_path = input("Enter the full path to the folder containing images: ").strip()
-    
-    # Validate folder path
-    if not os.path.isdir(folder_path):
-        print("Error: Invalid folder path.")
-        return
-    
-    # Confirm with user before renaming
-    confirm = input(f"Are you sure you want to rename all image files in {folder_path}? (yes/no): ").lower()
-    
-    if confirm == 'yes':
-        rename_image_files(folder_path)
-    else:
-        print("Operation cancelled.")
-
-if __name__ == "__main__":
-    main()
+                // Hide loading screen
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    
+                    // Show main content
+                    mainContent.style.display = 'block';
+                    setTimeout(() => {
+                        mainContent.style.opacity = '1';
+                    }, 50);
+                    
+                    // Load images from ./image directory
+                    loadImagesFromDirectory();
+                }, 800);
+            }, 3000);
+            
+            // Function to load images from ./image directory
+            function loadImagesFromDirectory() {
+                const gallery = document.getElementById('gallery');
+                const loadingMoreIndicator = document.getElementById('loading-more');
+                const imageDir = './image/'; 
+                
+                // Common image extensions
+                const extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+                
+                // Track loaded images and attempts
+                let imagesLoaded = 0;
+                let totalAttempts = 0;
+                const maxAttempts = 300; // Increased to try more combinations
+                let loadedImagePaths = []; // Store successfully loaded image paths
+                let allImagesDisplayed = false; // Flag to track if all images have been shown once
+                
+                // Try loading images with common names and all extensions
+                for (let i = 1; i <= 100; i++) { // Try up to 100 image numbers
+                    extensions.forEach(ext => {
+                        // Try various common filename patterns
+                        tryLoadImage(`${imageDir}${i}.${ext}`);
+                        tryLoadImage(`${imageDir}image${i}.${ext}`);
+                        tryLoadImage(`${imageDir}photo${i}.${ext}`);
+                        tryLoadImage(`${imageDir}img${i}.${ext}`);
+                        tryLoadImage(`${imageDir}pic${i}.${ext}`);
+                    });
+                }
+                
+                // Function to attempt loading an image with tracking
+                function tryLoadImage(src) {
+                    totalAttempts++;
+                    const img = new Image();
+                    
+                    img.onload = function() {
+                        // Image loaded successfully
+                        imagesLoaded++;
+                        loadedImagePaths.push(src); // Store path of successful image
+                        
+                        const item = document.createElement('div');
+                        item.className = 'gallery-item';
+                        // Set a random delay for the animation (between 0.1s and 0.9s)
+                        item.style.animationDelay = (Math.random() * 0.8 + 0.1) + 's';
+                        
+                        const displayImg = document.createElement('img');
+                        displayImg.src = src;
+                        displayImg.alt = 'Memory';
+                        displayImg.loading = 'lazy';
+                        
+                        item.appendChild(displayImg);
+                        gallery.appendChild(item);
+                        
+                        // Remove no-images message if it exists
+                        const noImagesMsg = document.getElementById('no-images-message');
+                        if (noImagesMsg) {
+                            noImagesMsg.remove();
+                        }
+                    };
+                    
+                    img.onerror = function() {
+                        checkForNoImages();
+                    };
+                    
+                    img.src = src;
+                }
+                
+                // Check if we should show no images message
+                function checkForNoImages() {
+                    if (imagesLoaded === 0 && totalAttempts >= maxAttempts) {
+                        console.log("No images found after trying multiple patterns");
+                        
+                        // If no images found, show message
+                        const noImagesMsg = document.getElementById('no-images-message');
+                        if (!noImagesMsg) {
+                            const message = document.createElement('div');
+                            message.id = 'no-images-message';
+                            message.innerHTML = `
+                                <p>No images found in the ./image folder.</p>
+                                <p>Please add images to the ./image folder and refresh the page.</p>
+                            `;
+                            gallery.appendChild(message);
+                        }
+                    }
+                }
+                
+                // Set up infinite scroll functionality
+                window.addEventListener('scroll', function() {
+                    // Check if we're near the bottom of the page
+                    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                        // If we have loaded images, start infinite scroll
+                        if (loadedImagePaths.length > 0 && allImagesDisplayed) {
+                            // Only start infinite scroll after all images have been displayed
+                            // Show loading indicator
+                            loadingMoreIndicator.style.display = 'block';
+                            
+                            // Wait a bit for effect, then load more images
+                            setTimeout(() => {
+                                loadMoreImages();
+                                loadingMoreIndicator.style.display = 'none';
+                            }, 1200);
+                        } else if (!allImagesDisplayed) {
+                            // If this is the first time reaching the bottom of the page,
+                            // mark that all images have been displayed
+                            console.log("User has reached the end of all initial images. Now enabling repeats.");
+                            allImagesDisplayed = true;
+                        }
+                    }
+                });
+                
+                // Function to load more images (shuffled repeats of all loaded images)
+                function loadMoreImages() {
+                    if (loadedImagePaths.length === 0) return;
+                    
+                    // Shuffle ALL loaded images for a truly random repeat experience
+                    const shuffledImages = [...loadedImagePaths].sort(() => Math.random() - 0.5);
+                    
+                    // Determine how many images to add (5-10)
+                    const numToAdd = Math.floor(Math.random() * 6) + 5;
+                    const imagesToAdd = Math.min(numToAdd, shuffledImages.length);
+                    
+                    console.log(`Adding ${imagesToAdd} repeat images from the collection of ${loadedImagePaths.length} total images`);
+                    
+                    for (let i = 0; i < imagesToAdd; i++) {
+                        const imgSrc = shuffledImages[i];
+                        
+                        const item = document.createElement('div');
+                        item.className = 'gallery-item';
+                        item.style.animationDelay = (Math.random() * 0.5) + 's';
+                        
+                        const displayImg = document.createElement('img');
+                        displayImg.src = imgSrc;
+                        displayImg.alt = 'Memory';
+                        displayImg.loading = 'lazy';
+                        
+                        item.appendChild(displayImg);
+                        gallery.appendChild(item);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
