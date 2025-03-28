@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memories Of Us</title>
+    <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=La+Belle+Aurore&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background-color: #f8f3f0;
+            font-family: 'Crimson Text', serif;
+            color: #4a0f1d;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(#e5d1cb 1px, transparent 1px),
+                radial-gradient(#e5d1cb 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        /* Define animations */
+        @keyframes heartbeat {
+            0% { transform: scale(1) rotate(45deg); }
+            15% { transform: scale(1.1) rotate(45deg); }
+            30% { transform: scale(1) rotate(45deg); }
+            45% { transform: scale(1.1) rotate(45deg); }
+            60% { transform: scale(1) rotate(45deg); }
+            100% { transform: scale(1) rotate(45deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes floatIn {
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 4px 20px rgba(74, 15, 29, 0.1); }
+            50% { box-shadow: 0 8px 25px rgba(74, 15, 29, 0.2); }
+            100% { box-shadow: 0 4px 20px rgba(74, 15, 29, 0.1); }
+        }
+
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f3f0;
+            z-index: 1000;
+            transition: opacity 0.8s ease-out;
+            background-image: 
+                radial-gradient(#e5d1cb 1px, transparent 1px),
+                radial-gradient(#e5d1cb 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        .card {
+            position: relative;
+            width: 90vw;
+            max-width: 400px;
+            height: 90vw;
+            max-height: 400px;
+            background-color: transparent;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+
+        .blur-shape {
+            position: absolute;
+            width: 30%;
+            height: 30%;
+            background-color: #4a0f1d;
+            transform: rotate(45deg);
+            filter: blur(10px);
+            opacity: 0.95;
+            top: 15%;
+            animation: heartbeat 2s infinite ease-in-out;
+        }
+        
+        .blur-shape::before,
+        .blur-shape::after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #4a0f1d;
+            border-radius: 50%;
+            filter: blur(10px);
+        }
+        
+        .blur-shape::before {
+            top: -50%;
+            left: 0;
+        }
+        
+        .blur-shape::after {
+            top: 0;
+            left: -50%;
+        }
+
+        /* Create a cleaner heart shape with less blur */
+        .blur-shape, .blur-shape::before, .blur-shape::after {
+            box-shadow: 0 0 10px 3px rgba(74, 15, 29, 0.5);
+        }
+        
+        .text {
+            position: absolute;
+            bottom: 8%;
+            color: #4a0f1d;
+            font-size: clamp(1rem, 5vw, 1.5rem);
+            text-align: center;
+            opacity: 0.9;
+            letter-spacing: 0.5px;
+            z-index: 20;
+            width: 90%;
+            line-height: 1.4;
+            font-family: 'La Belle Aurore', cursive;
+        }
+
+        /* Main Content */
+        .main-content {
+            opacity: 0;
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            padding: 2rem;
+            box-sizing: border-box;
+            transition: opacity 0.8s ease-in;
+        }
+
+        .title {
+            text-align: center;
+            margin: 2rem 0 3rem;
+            font-size: clamp(1.8rem, 5vw, 3rem);
+            color: #4a0f1d;
+            letter-spacing: 1px;
+            font-weight: 600;
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+        
+        /* Pinterest-like gallery */
+        .gallery {
+            column-count: 3;
+            column-gap: 20px;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .gallery-item {
+            break-inside: avoid;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(74, 15, 29, 0.1);
+            transition: all 0.5s ease;
+            background-color: #f8f3f0;
+            animation: floatIn 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-8px) scale(1.01);
+            box-shadow: 0 8px 25px rgba(74, 15, 29, 0.2);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .gallery-item::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, transparent 70%, rgba(74, 15, 29, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 10px;
+        }
+        
+        .gallery-item:hover::after {
+            opacity: 1;
+        }
+        
+        /* Loading indicator for infinite scroll - improved version */
+        .loading-more {
+            width: 100%;
+            max-width: 1200px;
+            margin: 2rem auto 3rem;
+            display: none;
+            position: relative;
+        }
+
+        .scroll-skeleton-container {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            position: relative;
+        }
+        
+        /* Add subtle pulsing border to container */
+        .scroll-skeleton-container::before {
+            content: "";
+            position: absolute;
+            top: -15px;
+            left: 0;
+            width: 100%;
+            height: calc(100% + 30px);
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(74, 15, 29, 0.05);
+            opacity: 0.6;
+            animation: pulse-border 2s infinite ease-in-out;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 15px rgba(74, 15, 29, 0.05); }
+            50% { box-shadow: 0 0 25px rgba(74, 15, 29, 0.1); }
+            100% { box-shadow: 0 0 15px rgba(74, 15, 29, 0.05); }
+        }
+
+        .scroll-skeleton-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(74, 15, 29, 0.08);
+            background-color: #f9f5f2;
+            transform: translateY(0);
+            transition: transform 0.3s ease-out;
+            animation: subtle-float 3s infinite ease-in-out alternate;
+        }
+        
+        @keyframes subtle-float {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-5px); }
+        }
+        
+        /* Create varied heights for more realistic appearance */
+        .scroll-skeleton-item:nth-child(1) {
+            height: 220px;
+            animation-delay: 0.2s;
+        }
+        
+        .scroll-skeleton-item:nth-child(2) {
+            height: 180px;
+            animation-delay: 0.5s;
+        }
+        
+        .scroll-skeleton-item:nth-child(3) {
+            height: 250px;
+            animation-delay: 0.8s;
+        }
+        
+        /* Shimmer effect */
+        .scroll-skeleton-item::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                90deg, 
+                rgba(255, 255, 255, 0) 0%, 
+                rgba(255, 255, 255, 0.7) 50%, 
+                rgba(255, 255, 255, 0) 100%
+            );
+            background-size: 200% 100%;
+            animation: skeleton-loading 2s infinite;
+        }
+        
+        /* Inner content shapes to simulate image and text */
+        .scroll-skeleton-item::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(
+                to bottom,
+                rgba(74, 15, 29, 0.02),
+                rgba(74, 15, 29, 0.07)
+            );
+            border-radius: 0 0 12px 12px;
+        }
+
+        /* No images message styling */
+        #no-images-message {
+            text-align: center;
+            margin: 40px 0;
+            padding: 30px;
+            color: #4a0f1d;
+            border: 1px dashed rgba(74, 15, 29, 0.3);
+            border-radius: 10px;
+            background-color: rgba(74, 15, 29, 0.05);
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        /* Media queries for different screen sizes */
+        @media (max-width: 900px) {
+            .gallery {
+                column-count: 2;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .blur-shape, .blur-shape::before, .blur-shape::after {
+                filter: blur(7px);
+            }
+            
+            .gallery {
+                column-count: 1;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .card {
+                height: 85vh;
+            }
+            
+            .blur-shape {
+                top: 20%;
+            }
+            
+            .text {
+                bottom: 12%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen">
+        <div class="card">
+            <div class="blur-shape"></div>
+            <div class="text">
+                all the pretty stars shine for you, my love
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <h1 class="title">Memories Of Us That Live In My Mind</h1>
+        <div class="gallery" id="gallery">
+            <!-- Images will be loaded here dynamically -->
+        </div>
+        
+        <!-- Loading indicator for infinite scroll -->
+        <div class="loading-more" id="loading-more">
+            <div class="scroll-skeleton-container">
+                <div class="scroll-skeleton-item"></div>
+                <div class="scroll-skeleton-item"></div>
+                <div class="scroll-skeleton-item"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show loading screen for at least 3 seconds
+            setTimeout(function() {
+                const loadingScreen = document.querySelector('.loading-screen');
+                const mainContent = document.querySelector('.main-content');
+                
+                // Hide loading screen
+                loadingScreen.style.opacity = '0';
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                    
+                    // Show main content
+                    mainContent.style.display = 'block';
+                    setTimeout(() => {
+                        mainContent.style.opacity = '1';
+                    }, 50);
+                    
+                    // Load images from ./image directory
+                    loadImagesFromDirectory();
+                }, 800);
+            }, 3000);
+            
+            // Function to load images from ./image directory
+            function loadImagesFromDirectory() {
+                const gallery = document.getElementById('gallery');
+                const loadingMoreIndicator = document.getElementById('loading-more');
+                const imageDir = './image/'; 
+                
+                // Common image extensions
+                const extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+                
+                // Track loaded images and attempts
+                let imagesLoaded = 0;
+                let totalAttempts = 0;
+                const maxAttempts = 300; // Increased to try more combinations
+                let loadedImagePaths = []; // Store successfully loaded image paths
+                
+                // Try loading images with common names and all extensions
+                for (let i = 1; i <= 50; i++) { // Try up to 50 image numbers
+                    extensions.forEach(ext => {
+                        // Try various common filename patterns
+                        tryLoadImage(`${imageDir}${i}.${ext}`);
+                        tryLoadImage(`${imageDir}image${i}.${ext}`);
+                        tryLoadImage(`${imageDir}photo${i}.${ext}`);
+                        tryLoadImage(`${imageDir}img${i}.${ext}`);
+                        tryLoadImage(`${imageDir}pic${i}.${ext}`);
+                    });
+                }
+                
+                // Function to attempt loading an image with tracking
+                function tryLoadImage(src) {
+                    totalAttempts++;
+                    const img = new Image();
+                    
+                    img.onload = function() {
+                        // Image loaded successfully
+                        imagesLoaded++;
+                        loadedImagePaths.push(src); // Store path of successful image
+                        
+                        const item = document.createElement('div');
+                        item.className = 'gallery-item';
+                        // Set a random delay for the animation (between 0.1s and 0.9s)
+                        item.style.animationDelay = (Math.random() * 0.8 + 0.1) + 's';
+                        
+                        const displayImg = document.createElement('img');
+                        displayImg.src = src;
+                        displayImg.alt = 'Memory';
+                        displayImg.loading = 'lazy';
+                        
+                        item.appendChild(displayImg);
+                        gallery.appendChild(item);
+                        
+                        // Remove no-images message if it exists
+                        const noImagesMsg = document.getElementById('no-images-message');
+                        if (noImagesMsg) {
+                            noImagesMsg.remove();
+                        }
+                    };
+                    
+                    img.onerror = function() {
+                        checkForNoImages();
+                    };
+                    
+                    img.src = src;
+                }
+                
+                // Check if we should show no images message
+                function checkForNoImages() {
+                    if (imagesLoaded === 0 && totalAttempts >= maxAttempts) {
+                        console.log("No images found after trying multiple patterns");
+                        
+                        // If no images found, show message
+                        const noImagesMsg = document.getElementById('no-images-message');
+                        if (!noImagesMsg) {
+                            const message = document.createElement('div');
+                            message.id = 'no-images-message';
+                            message.innerHTML = `
+                                <p>No images found in the ./image folder.</p>
+                                <p>Please add images to the ./image folder and refresh the page.</p>
+                            `;
+                            gallery.appendChild(message);
+                        }
+                    }
+                }
+                
+                // Set up infinite scroll functionality
+                window.addEventListener('scroll', function() {
+                    // Check if we're near the bottom of the page
+                    if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
+                        // If we have loaded images, start infinite scroll
+                        if (loadedImagePaths.length > 0) {
+                            // Show loading indicator
+                            loadingMoreIndicator.style.display = 'block';
+                            
+                            // Wait a bit for effect, then load more images
+                            setTimeout(() => {
+                                loadMoreImages();
+                                loadingMoreIndicator.style.display = 'none';
+                            }, 1200);
+                        }
+                    }
+                });
+                
+                // Function to load more images (shuffled from existing ones) for infinite scroll
+                function loadMoreImages() {
+                    // Shuffle the array of image paths
+                    const shuffledImages = [...loadedImagePaths].sort(() => Math.random() - 0.5);
+                    
+                    // Add 5-10 random images from our loaded set
+                    const numToAdd = Math.floor(Math.random() * 6) + 5;
+                    
+                    for (let i = 0; i < numToAdd && i < shuffledImages.length; i++) {
+                        const item = document.createElement('div');
+                        item.className = 'gallery-item';
+                        item.style.animationDelay = (Math.random() * 0.5) + 's';
+                        
+                        const displayImg = document.createElement('img');
+                        displayImg.src = shuffledImages[i];
+                        displayImg.alt = 'Memory';
+                        displayImg.loading = 'lazy';
+                        
+                        item.appendChild(displayImg);
+                        gallery.appendChild(item);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
