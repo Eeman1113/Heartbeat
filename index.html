@@ -408,6 +408,65 @@
         .gallery-skeleton-item::before {
             content: none;
         }
+
+        /* Media queries for responsive design */
+        @media (max-width: 900px) {
+            .gallery {
+                display: flex;
+            }
+            
+            #column3 {
+                display: none;
+            }
+            
+            .gallery-column {
+                flex: 1;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .gallery {
+                display: flex;
+                gap: 15px; /* Smaller gap for mobile */
+            }
+            
+            #column3 {
+                display: none; /* Only hide column 3 on mobile */
+            }
+            
+            #column1, #column2 {
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .gallery-column {
+                flex: 1;
+            }
+            
+            /* Adjust skeleton items for mobile - now show 2 columns */
+            .scroll-skeleton-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .scroll-skeleton-item:nth-child(1),
+            .scroll-skeleton-item:nth-child(2) {
+                height: 160px;
+            }
+            
+            .scroll-skeleton-item:nth-child(3) {
+                display: none; /* Hide the third skeleton item on mobile */
+            }
+            
+            /* Adjust the gallery skeleton items for 2 columns */
+            .gallery-skeleton-item {
+                height: 180px !important; /* Override the varied heights for mobile */
+            }
+            
+            /* Make loading indicator smaller */
+            .loading-more {
+                margin: 1.5rem auto 2rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -643,10 +702,19 @@
                     // Add to visibleImages set to track uniqueness
                     visibleImages.add(src);
                     
+                    // Check how many columns we should have based on screen width
+                    const isMobile = window.innerWidth <= 600;
+                    const numColumns = isMobile ? 2 : (window.innerWidth <= 900 ? 2 : 3);
+                    
                     // Row-wise distribution (place images in order across columns)
                     // imageIndex is 1-based, so we subtract 1 to make it 0-based
-                    const rowIndex = Math.floor((imageIndex - 1) / 3);
-                    const columnIndex = (imageIndex - 1) % 3;
+                    const rowIndex = Math.floor((imageIndex - 1) / numColumns);
+                    const columnIndex = (imageIndex - 1) % numColumns;
+                    
+                    // Skip column 3 on mobile and tablet
+                    if ((isMobile || window.innerWidth <= 900) && columnIndex >= numColumns) {
+                        return; // Skip this image for now, it will be in remainingImagePaths
+                    }
                     
                     const column = document.getElementById(`column${columnIndex + 1}`);
                     
@@ -713,15 +781,24 @@
                     // Update visible images list (remove images that have scrolled out of view)
                     updateVisibleImages();
                     
+                    // Check how many columns are currently visible (for responsive layout)
+                    const isMobile = window.innerWidth <= 600;
+                    const numColumns = isMobile ? 2 : (window.innerWidth <= 900 ? 2 : 3);
+                    
                     // Load them row by row
-                    const numRows = Math.ceil(imagesToLoad.length / 3);
+                    const numRows = Math.ceil(imagesToLoad.length / numColumns);
                     
                     for (let row = 0; row < numRows; row++) {
-                        for (let col = 0; col < 3; col++) {
-                            const imageIndex = row * 3 + col;
+                        for (let col = 0; col < numColumns; col++) {
+                            const imageIndex = row * numColumns + col;
                             if (imageIndex < imagesToLoad.length) {
                                 const imgSrc = imagesToLoad[imageIndex];
                                 const delay = row * 100 + col * 50;
+                                
+                                // Skip column 3 on mobile and tablet
+                                if ((isMobile || window.innerWidth <= 900) && col >= numColumns) {
+                                    continue;
+                                }
                                 
                                 setTimeout(() => {
                                     const item = document.createElement('div');
@@ -796,19 +873,28 @@
                         shuffleArray(availableImages);
                     }
                     
+                    // Check how many columns are currently visible (for responsive layout)
+                    const isMobile = window.innerWidth <= 600;
+                    const numColumns = isMobile ? 2 : (window.innerWidth <= 900 ? 2 : 3);
+                    
                     // Ensure we have enough images for this batch
-                    const batchSize = Math.min(availableImages.length, maxImagesPerBatch);
+                    const batchSize = Math.min(availableImages.length, rowsPerBatch * numColumns);
                     const imagesToLoad = availableImages.slice(0, batchSize);
                     
                     // Load them row by row
-                    const numRows = Math.ceil(imagesToLoad.length / 3);
+                    const numRows = Math.ceil(imagesToLoad.length / numColumns);
                     
                     for (let row = 0; row < numRows; row++) {
-                        for (let col = 0; col < 3; col++) {
-                            const imageIndex = row * 3 + col;
+                        for (let col = 0; col < numColumns; col++) {
+                            const imageIndex = row * numColumns + col;
                             if (imageIndex < imagesToLoad.length) {
                                 const imgSrc = imagesToLoad[imageIndex];
                                 const delay = row * 100 + col * 50;
+                                
+                                // Skip column 3 on mobile and tablet
+                                if ((isMobile || window.innerWidth <= 900) && col >= numColumns) {
+                                    continue;
+                                }
                                 
                                 setTimeout(() => {
                                     const item = document.createElement('div');
@@ -860,6 +946,45 @@
                         gallery.appendChild(message);
                     }
                 }
+                
+                // Add resize event listener for responsive layout adjustments
+                let resizeTimer;
+                window.addEventListener('resize', function() {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(function() {
+                        // Only need to handle this if we've completed discovery
+                        if (imagesDiscoveryComplete) {
+                            // Check if width has crossed our breakpoints
+                            const isMobile = window.innerWidth <= 600;
+                            const isTablet = window.innerWidth <= 900 && window.innerWidth > 600;
+                            
+                            // Show/hide columns based on screen size
+                            const column1 = document.getElementById('column1');
+                            const column2 = document.getElementById('column2');
+                            const column3 = document.getElementById('column3');
+                            
+                            if (isMobile) {
+                                // Show only columns 1 and 2
+                                if (column1) column1.style.display = 'flex';
+                                if (column2) column2.style.display = 'flex';
+                                if (column3) column3.style.display = 'none';
+                            } else if (isTablet) {
+                                // Show only columns 1 and 2
+                                if (column1) column1.style.display = 'flex';
+                                if (column2) column2.style.display = 'flex';
+                                if (column3) column3.style.display = 'none';
+                            } else {
+                                // Show all columns
+                                if (column1) column1.style.display = 'flex';
+                                if (column2) column2.style.display = 'flex';
+                                if (column3) column3.style.display = 'flex';
+                            }
+                            
+                            // Update visible images to reflect new layout
+                            updateVisibleImages();
+                        }
+                    }, 250); // Debounce resize event
+                });
             }
         });
     </script>
