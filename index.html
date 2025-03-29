@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Memories With You</title>
+    <title>Memories Of Us</title>
     <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:wght@400;600&family=La+Belle+Aurore&display=swap" rel="stylesheet">
     <style>
         body {
@@ -39,6 +39,13 @@
         @keyframes floatIn {
             0% { opacity: 0; transform: translateY(10px); }
             100% { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* New smoother animation for gallery items */
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: translateY(25px) scale(0.95); }
+            60% { opacity: 0.8; }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
         }
         
         @keyframes pulse {
@@ -158,25 +165,35 @@
         
         /* Pinterest-like gallery */
         .gallery {
-            column-count: 3;
-            column-gap: 20px;
+            display: flex;
+            column-count: initial;
+            gap: 20px;
             width: 100%;
             max-width: 1200px;
             margin: 0 auto;
         }
 
+        .gallery-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
         .gallery-item {
             break-inside: avoid;
-            margin-bottom: 20px;
+            margin-bottom: 0;
             position: relative;
             overflow: hidden;
             border-radius: 10px;
             box-shadow: 0 4px 20px rgba(74, 15, 29, 0.1);
             transition: all 0.5s ease;
             background-color: #f8f3f0;
-            animation: floatIn 0.6s ease-out forwards;
+            animation: fadeInScale 0.8s ease-out forwards;
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(25px) scale(0.95);
+            animation-play-state: paused;
+            width: 100%;
         }
 
         .gallery-item:hover {
@@ -230,12 +247,9 @@
         .scroll-skeleton-item {
             position: relative;
             overflow: hidden;
-            border-radius: 12px;
-            background-color: hsl(6, 10%, 97%);
-            box-shadow: 
-                0 1px 2px rgba(0, 0, 0, 0.04),
-                0 2px 4px rgba(0, 0, 0, 0.02);
-            transition: all 0.2s ease;
+            border-radius: 10px;
+            background-color: #f2f2f2;
+            box-shadow: none;
         }
         
         /* Varied heights for more natural appearance */
@@ -251,105 +265,47 @@
             height: 250px;
         }
         
-        /* Shadcn-inspired shimmer effect */
+        /* Remove shimmer effect */
         .scroll-skeleton-item::before {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(
-                90deg,
-                hsl(6, 10%, 97%) 0%,
-                hsl(6, 10%, 95%) 20%,
-                hsl(6, 10%, 97%) 40%
-            );
-            background-size: 200% 100%;
-            animation: shimmer 2s ease-in-out infinite;
-            z-index: 1;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: -100% 0; }
-            100% { background-position: 100% 0; }
+            content: none;
         }
         
-        /* Image placeholder */
+        /* Remove gradient overlay */
         .scroll-skeleton-item::after {
-            content: "";
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 60px;
-            background: linear-gradient(
-                to bottom,
-                transparent,
-                rgba(74, 15, 29, 0.04) 70%,
-                rgba(74, 15, 29, 0.06) 100%
-            );
-            border-radius: 0 0 12px 12px;
-            z-index: 2;
+            content: none;
         }
         
-        /* Faux image aspect ratio container */
-        .scroll-skeleton-item span:first-child {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: calc(100% - 40px);
-            border-radius: 12px 12px 0 0;
-        }
-        
-        /* Faux text line - title */
-        .scroll-skeleton-item span:nth-child(2) {
-            position: absolute;
-            bottom: 24px;
-            left: 15px;
-            width: 50%;
-            height: 8px;
-            background-color: rgba(74, 15, 29, 0.06);
-            border-radius: 4px;
-        }
-        
-        /* Faux text line - subtitle */
-        .scroll-skeleton-item span:nth-child(3) {
-            position: absolute;
-            bottom: 10px;
-            left: 15px;
-            width: 70%;
-            height: 6px;
-            background-color: rgba(74, 15, 29, 0.04);
-            border-radius: 3px;
+        /* Remove faux elements */
+        .scroll-skeleton-item span {
+            display: none;
         }
         
         /* Media queries for responsive design */
         @media (max-width: 900px) {
-            .scroll-skeleton-container {
-                grid-template-columns: repeat(2, 1fr);
+            .gallery {
+                display: flex;
             }
             
-            .gallery {
-                column-count: 2;
+            #column3 {
+                display: none;
+            }
+            
+            .gallery-column {
+                flex: 1;
             }
         }
 
         @media (max-width: 600px) {
-            .scroll-skeleton-container {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-                padding: 5px;
-            }
-            
             .gallery {
-                column-count: 2;
-                column-gap: 15px;
+                display: flex;
             }
             
-            .gallery-item {
-                margin-bottom: 15px;
+            #column2, #column3 {
+                display: none;
+            }
+            
+            .gallery-column {
+                flex: 1;
             }
             
             /* Smaller skeleton items for mobile */
@@ -423,6 +379,35 @@
                 bottom: 12%;
             }
         }
+
+        /* Skeleton loader for initial gallery */
+        .gallery-skeleton-item {
+            position: relative;
+            width: 100%;
+            border-radius: 10px;
+            background-color: #f2f2f2;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: none;
+        }
+        
+        /* Varied heights for skeleton items to look more natural */
+        .gallery-skeleton-item:nth-child(3n+1) {
+            height: 230px;
+        }
+        
+        .gallery-skeleton-item:nth-child(3n+2) {
+            height: 270px;
+        }
+        
+        .gallery-skeleton-item:nth-child(3n+3) {
+            height: 200px;
+        }
+        
+        /* Remove shimmer animation */
+        .gallery-skeleton-item::before {
+            content: none;
+        }
     </style>
 </head>
 <body>
@@ -440,7 +425,46 @@
     <div class="main-content">
         <h1 class="title">memories of you that live in my mind.</h1>
         <div class="gallery" id="gallery">
-            <!-- Images will be loaded here dynamically -->
+            <!-- Replace column structure with skeleton loaders -->
+            <div class="gallery-column" id="column1">
+                <!-- Skeleton loaders for column 1 -->
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+                <div class="gallery-skeleton-item" data-column="1"></div>
+            </div>
+            <div class="gallery-column" id="column2">
+                <!-- Skeleton loaders for column 2 -->
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+                <div class="gallery-skeleton-item" data-column="2"></div>
+            </div>
+            <div class="gallery-column" id="column3">
+                <!-- Skeleton loaders for column 3 -->
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+                <div class="gallery-skeleton-item" data-column="3"></div>
+            </div>
         </div>
         
         <!-- Loading indicator for infinite scroll -->
@@ -495,80 +519,149 @@
                 const imageDir = './image/'; 
                 
                 // Common image extensions
-                const extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+                const extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
                 
                 // Track loaded images and attempts
                 let imagesLoaded = 0;
                 let totalAttempts = 0;
-                const maxAttempts = 300; // Increased to try more combinations
+                const maxAttempts = 150; // Reasonable limit
                 let loadedImagePaths = []; // Store successfully loaded image paths
                 let allImagesDisplayed = false; // Flag to track if all images have been shown once
+                let imagesDiscoveryComplete = false; // Flag to track if all image discovery attempts are finished
                 
-                // Try loading images with common names and all extensions
-                for (let i = 1; i <= 100; i++) { // Try up to 100 image numbers
-                    extensions.forEach(ext => {
-                        // Try various common filename patterns
-                        tryLoadImage(`${imageDir}${i}.${ext}`);
-                        tryLoadImage(`${imageDir}image${i}.${ext}`);
-                        tryLoadImage(`${imageDir}photo${i}.${ext}`);
-                        tryLoadImage(`${imageDir}img${i}.${ext}`);
-                        tryLoadImage(`${imageDir}pic${i}.${ext}`);
-                    });
-                }
+                // Track currently visible images to avoid duplicates
+                let visibleImages = new Set();
+                let batchCounter = 0; // Count how many batches we've added
                 
-                // Function to attempt loading an image with tracking
-                function tryLoadImage(src) {
-                    totalAttempts++;
+                // Manage the number of rows to display at once
+                const rowsPerBatch = 7;
+                const imagesPerRow = 3;
+                const maxImagesPerBatch = rowsPerBatch * imagesPerRow;
+                let skeletonItems = document.querySelectorAll('.gallery-skeleton-item');
+                let remainingImagePaths = []; // Store images that didn't fit in first batch
+                
+                // Try to load numbered webp files sequentially
+                let currentImage = 1;
+                
+                // Start the sequential loading process
+                tryNextImage();
+                
+                // Function to try loading the next image
+                function tryNextImage() {
+                    // Check if we've tried enough images
+                    if (currentImage > 50) {
+                        finishImageDiscovery();
+                        return;
+                    }
+                    
+                    // Generate the image path (numbered webp)
+                    const imagePath = `${imageDir}${currentImage}.webp`;
+                    currentImage++;
+                    
+                    // Try to load the image
                     const img = new Image();
+                    totalAttempts++;
                     
                     img.onload = function() {
                         // Image loaded successfully
-                        imagesLoaded++;
-                        loadedImagePaths.push(src); // Store path of successful image
+                        loadedImagePaths.push(imagePath);
                         
-                        const item = document.createElement('div');
-                        item.className = 'gallery-item';
-                        // Set a random delay for the animation (between 0.1s and 0.9s)
-                        item.style.animationDelay = (Math.random() * 0.8 + 0.1) + 's';
-                        
-                        const displayImg = document.createElement('img');
-                        displayImg.src = src;
-                        displayImg.alt = 'Memory';
-                        displayImg.loading = 'lazy';
-                        
-                        item.appendChild(displayImg);
-                        gallery.appendChild(item);
-                        
-                        // Remove no-images message if it exists
-                        const noImagesMsg = document.getElementById('no-images-message');
-                        if (noImagesMsg) {
-                            noImagesMsg.remove();
+                        // If we have enough images for the first batch, store the rest for later
+                        if (loadedImagePaths.length <= maxImagesPerBatch) {
+                            // Add to gallery (replacing skeleton)
+                            addImageToGallery(imagePath, loadedImagePaths.length);
+                        } else {
+                            // Store for later loading when user scrolls down
+                            remainingImagePaths.push(imagePath);
                         }
+                        
+                        // Continue with next image after a small delay
+                        setTimeout(tryNextImage, 80);
                     };
                     
                     img.onerror = function() {
-                        checkForNoImages();
+                        // If we get 3 consecutive errors, assume we've reached the end of the images
+                        if (currentImage > 3 && loadedImagePaths.length > 0) {
+                            finishImageDiscovery();
+                            return;
+                        }
+                        
+                        // Continue with next image with a small delay
+                        setTimeout(tryNextImage, 30);
                     };
                     
-                    img.src = src;
+                    img.src = imagePath;
                 }
                 
-                // Check if we should show no images message
-                function checkForNoImages() {
-                    if (imagesLoaded === 0 && totalAttempts >= maxAttempts) {
-                        console.log("No images found after trying multiple patterns");
-                        
-                        // If no images found, show message
-                        const noImagesMsg = document.getElementById('no-images-message');
-                        if (!noImagesMsg) {
-                            const message = document.createElement('div');
-                            message.id = 'no-images-message';
-                            message.innerHTML = `
-                                <p>No images found in the ./image folder.</p>
-                                <p>Please add images to the ./image folder and refresh the page.</p>
-                            `;
-                            gallery.appendChild(message);
+                // Function to finish the discovery process
+                function finishImageDiscovery() {
+                    console.log(`Image discovery completed. Found ${loadedImagePaths.length + remainingImagePaths.length} images total.`);
+                    console.log(`Loaded ${loadedImagePaths.length} images in first batch, ${remainingImagePaths.length} remaining.`);
+                    
+                    imagesDiscoveryComplete = true;
+                    
+                    // If no images found, show message
+                    if (loadedImagePaths.length === 0 && remainingImagePaths.length === 0) {
+                        showNoImagesMessage();
+                        return;
+                    }
+                    
+                    // Remove any remaining skeleton loaders
+                    skeletonItems.forEach(item => {
+                        if (item.parentNode) {
+                            item.parentNode.removeChild(item);
                         }
+                    });
+                    
+                    // Pre-load the remaining images
+                    remainingImagePaths.forEach(path => {
+                        const preloadImg = new Image();
+                        preloadImg.src = path;
+                    });
+                }
+                
+                // Function to add an image to the gallery (replacing skeleton loader)
+                function addImageToGallery(src, imageIndex) {
+                    imagesLoaded++;
+                    
+                    const item = document.createElement('div');
+                    item.className = 'gallery-item';
+                    item.dataset.imagePath = src; // Store the image path for tracking
+                    
+                    // Animation delay based on load order
+                    const delay = Math.min(0.05 * imagesLoaded, 1.5);
+                    item.style.animationDelay = delay + 's';
+                    item.style.animationPlayState = 'running';
+                    
+                    const displayImg = document.createElement('img');
+                    displayImg.src = src;
+                    displayImg.alt = 'Memory';
+                    displayImg.loading = 'lazy';
+                    
+                    item.appendChild(displayImg);
+                    
+                    // Add to visibleImages set to track uniqueness
+                    visibleImages.add(src);
+                    
+                    // Row-wise distribution (place images in order across columns)
+                    // imageIndex is 1-based, so we subtract 1 to make it 0-based
+                    const rowIndex = Math.floor((imageIndex - 1) / 3);
+                    const columnIndex = (imageIndex - 1) % 3;
+                    
+                    const column = document.getElementById(`column${columnIndex + 1}`);
+                    
+                    // Find and replace a skeleton loader if available
+                    const skeletonToReplace = column.querySelector('.gallery-skeleton-item');
+                    if (skeletonToReplace) {
+                        column.replaceChild(item, skeletonToReplace);
+                    } else {
+                        column.appendChild(item);
+                    }
+                    
+                    // Remove no-images message if it exists
+                    const noImagesMsg = document.getElementById('no-images-message');
+                    if (noImagesMsg) {
+                        noImagesMsg.remove();
                     }
                 }
                 
@@ -576,53 +669,195 @@
                 window.addEventListener('scroll', function() {
                     // Check if we're near the bottom of the page
                     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500) {
-                        // If we have loaded images, start infinite scroll
-                        if (loadedImagePaths.length > 0 && allImagesDisplayed) {
-                            // Only start infinite scroll after all images have been displayed
-                            // Show loading indicator
-                            loadingMoreIndicator.style.display = 'block';
-                            
-                            // Wait a bit for effect, then load more images
-                            setTimeout(() => {
-                                loadMoreImages();
-                                loadingMoreIndicator.style.display = 'none';
-                            }, 1200);
-                        } else if (!allImagesDisplayed) {
-                            // If this is the first time reaching the bottom of the page,
-                            // mark that all images have been displayed
-                            console.log("User has reached the end of all initial images. Now enabling repeats.");
-                            allImagesDisplayed = true;
+                        // Only proceed if we've completed image discovery
+                        if (imagesDiscoveryComplete) {
+                            // If we have remaining images to show, show them first
+                            if (remainingImagePaths.length > 0) {
+                                // Show loading indicator
+                                loadingMoreIndicator.style.display = 'block';
+                                
+                                // Wait a bit for effect, then load more from remaining images
+                                setTimeout(() => {
+                                    loadRemainingImages();
+                                    loadingMoreIndicator.style.display = 'none';
+                                }, 1200);
+                            } 
+                            // Otherwise, if we've shown all initial images, repeat them
+                            else if (allImagesDisplayed) {
+                                // Show loading indicator
+                                loadingMoreIndicator.style.display = 'block';
+                                
+                                // Wait a bit for effect, then load more images
+                                setTimeout(() => {
+                                    loadMoreImages();
+                                    loadingMoreIndicator.style.display = 'none';
+                                }, 1200);
+                            } else if (!allImagesDisplayed) {
+                                // If this is the first time reaching the bottom of the page,
+                                // mark that all images have been displayed
+                                console.log("User has reached the end of all initial images. Now enabling repeats.");
+                                allImagesDisplayed = true;
+                            }
                         }
                     }
                 });
                 
-                // Function to load more images (shuffled repeats of all loaded images)
+                // Function to load remaining discovered images
+                function loadRemainingImages() {
+                    const batchSize = Math.min(remainingImagePaths.length, maxImagesPerBatch);
+                    console.log(`Loading ${batchSize} more images from remaining discovered images`);
+                    
+                    // Take a batch of remaining images
+                    const imagesToLoad = remainingImagePaths.splice(0, batchSize);
+                    
+                    // Update visible images list (remove images that have scrolled out of view)
+                    updateVisibleImages();
+                    
+                    // Load them row by row
+                    const numRows = Math.ceil(imagesToLoad.length / 3);
+                    
+                    for (let row = 0; row < numRows; row++) {
+                        for (let col = 0; col < 3; col++) {
+                            const imageIndex = row * 3 + col;
+                            if (imageIndex < imagesToLoad.length) {
+                                const imgSrc = imagesToLoad[imageIndex];
+                                const delay = row * 100 + col * 50;
+                                
+                                setTimeout(() => {
+                                    const item = document.createElement('div');
+                                    item.className = 'gallery-item';
+                                    item.dataset.imagePath = imgSrc; // Store the image path
+                                    
+                                    const animDelay = 0.1 * col;
+                                    item.style.animationDelay = animDelay + 's';
+                                    item.style.animationPlayState = 'running';
+                                    
+                                    const displayImg = document.createElement('img');
+                                    displayImg.src = imgSrc;
+                                    displayImg.alt = 'Memory';
+                                    displayImg.loading = 'lazy';
+                                    
+                                    item.appendChild(displayImg);
+                                    
+                                    // Add to correct column based on row-wise distribution
+                                    const column = document.getElementById(`column${col + 1}`);
+                                    column.appendChild(item);
+                                    
+                                    // Track this image as visible
+                                    visibleImages.add(imgSrc);
+                                }, delay);
+                            }
+                        }
+                    }
+                }
+                
+                // Function to update the list of currently visible images
+                function updateVisibleImages() {
+                    visibleImages.clear();
+                    
+                    // Get all gallery items that are currently in the visible viewport
+                    const galleryItems = document.querySelectorAll('.gallery-item');
+                    
+                    galleryItems.forEach(item => {
+                        const rect = item.getBoundingClientRect();
+                        // Check if the item is visible in the viewport
+                        if (rect.top >= -rect.height && rect.top <= window.innerHeight) {
+                            visibleImages.add(item.dataset.imagePath);
+                        }
+                    });
+                    
+                    console.log(`Currently tracking ${visibleImages.size} visible images`);
+                }
+                
+                // Function to load repeating images for infinite scroll
                 function loadMoreImages() {
                     if (loadedImagePaths.length === 0) return;
                     
-                    // Shuffle ALL loaded images for a truly random repeat experience
-                    const shuffledImages = [...loadedImagePaths].sort(() => Math.random() - 0.5);
+                    batchCounter++;
+                    console.log(`Adding batch #${batchCounter} of repeating images`);
                     
-                    // Determine how many images to add (5-10)
-                    const numToAdd = Math.floor(Math.random() * 6) + 5;
-                    const imagesToAdd = Math.min(numToAdd, shuffledImages.length);
+                    // Create a copy of all loaded images
+                    const allImages = [...loadedImagePaths, ...remainingImagePaths];
                     
-                    console.log(`Adding ${imagesToAdd} repeat images from the collection of ${loadedImagePaths.length} total images`);
+                    // Update the set of currently visible images
+                    updateVisibleImages();
                     
-                    for (let i = 0; i < imagesToAdd; i++) {
-                        const imgSrc = shuffledImages[i];
-                        
-                        const item = document.createElement('div');
-                        item.className = 'gallery-item';
-                        item.style.animationDelay = (Math.random() * 0.5) + 's';
-                        
-                        const displayImg = document.createElement('img');
-                        displayImg.src = imgSrc;
-                        displayImg.alt = 'Memory';
-                        displayImg.loading = 'lazy';
-                        
-                        item.appendChild(displayImg);
-                        gallery.appendChild(item);
+                    // Filter out images that are currently visible to avoid duplicates
+                    let availableImages = allImages.filter(img => !visibleImages.has(img));
+                    
+                    // If we don't have enough unique images, use all images but ensure
+                    // each 7-row batch has unique images
+                    if (availableImages.length < maxImagesPerBatch) {
+                        availableImages = [...allImages];
+                        // Shuffle to avoid predictable repeats
+                        shuffleArray(availableImages);
+                    } else {
+                        // Shuffle the available images for variety
+                        shuffleArray(availableImages);
+                    }
+                    
+                    // Ensure we have enough images for this batch
+                    const batchSize = Math.min(availableImages.length, maxImagesPerBatch);
+                    const imagesToLoad = availableImages.slice(0, batchSize);
+                    
+                    // Load them row by row
+                    const numRows = Math.ceil(imagesToLoad.length / 3);
+                    
+                    for (let row = 0; row < numRows; row++) {
+                        for (let col = 0; col < 3; col++) {
+                            const imageIndex = row * 3 + col;
+                            if (imageIndex < imagesToLoad.length) {
+                                const imgSrc = imagesToLoad[imageIndex];
+                                const delay = row * 100 + col * 50;
+                                
+                                setTimeout(() => {
+                                    const item = document.createElement('div');
+                                    item.className = 'gallery-item';
+                                    item.dataset.imagePath = imgSrc; // Store the image path
+                                    
+                                    const animDelay = 0.1 * col;
+                                    item.style.animationDelay = animDelay + 's';
+                                    item.style.animationPlayState = 'running';
+                                    
+                                    const displayImg = document.createElement('img');
+                                    displayImg.src = imgSrc;
+                                    displayImg.alt = 'Memory';
+                                    displayImg.loading = 'lazy';
+                                    
+                                    item.appendChild(displayImg);
+                                    
+                                    // Add to correct column based on row-wise distribution
+                                    const column = document.getElementById(`column${col + 1}`);
+                                    column.appendChild(item);
+                                    
+                                    // Track this image as visible
+                                    visibleImages.add(imgSrc);
+                                }, delay);
+                            }
+                        }
+                    }
+                }
+                
+                // Fisher-Yates shuffle algorithm
+                function shuffleArray(array) {
+                    for (let i = array.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [array[i], array[j]] = [array[j], array[i]];
+                    }
+                    return array;
+                }
+                
+                // Function to show no images message
+                function showNoImagesMessage() {
+                    const noImagesMsg = document.getElementById('no-images-message');
+                    if (!noImagesMsg) {
+                        const message = document.createElement('div');
+                        message.id = 'no-images-message';
+                        message.innerHTML = `
+                            <p>No images found in the ./image folder.</p>
+                            <p>Please add images to the ./image folder and refresh the page.</p>
+                        `;
+                        gallery.appendChild(message);
                     }
                 }
             }
